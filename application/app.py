@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+import os
 import sys
-from PyQt4 import QtGui, QtCore
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 from safety_main import Ui_TransportationSafety
 
 
@@ -66,8 +68,110 @@ class DisplayImage(object):
         y_scaled = round(y_coord * self.scale_factor)
         return x_scaled, y_scaled
 
+class ImageLabel(QWidget):
+    def __init__(self, parent=None):
+        super(ImageLabel, self).__init__(parent)
 
-class MainGUI(QtGui.QMainWindow):
+        # self.zoomSpinBox = QSlider()
+
+        self.filename = None
+        self.image = QImage()
+        self.imageLabel = QLabel()
+        self.imageLabel.setMinimumSize(500, 300)
+        self.imageLabel.setContextMenuPolicy(Qt.ActionsContextMenu)
+        self.currentPoint = QPoint(300,300)
+        self.allPoints = []
+
+    @property
+    def zoomSpinBox(self):
+        return self._zoomSpinBox
+    @zoomSpinBox.setter
+    def zoomSpinBox(self, new_zsb):
+        print("ConfigSlider")
+        self._zoomSpinBox = new_zsb
+        self._zoomSpinBox.setMinimum(10)
+        self._zoomSpinBox.setMaximum(400)
+        self._zoomSpinBox.setValue(100)
+        self._zoomSpinBox.valueChanged.connect(self.showImage)
+
+
+    
+
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.currentPoint = event.pos()
+            self.allPoints.append(self.currentPoint)
+            self.update()
+
+    def paintEvent(self, event):
+        # self.imageLabel.setPixmap(QPixmap.fromImage(self.image1))
+        painter = QPainter(self)
+        pen = QPen(Qt.blue, 7, Qt.SolidLine, Qt.RoundCap)
+        painter.drawImage(event.rect(), self.image)
+        painter.setPen(pen)
+        for point in self.allPoints:
+            painter.drawPoint(point)
+        # self.showImage()
+
+    def showImage(self, percent=None):
+        if self.image.isNull():
+            return
+        if percent is None:
+            percent = self.zoomSpinBox.value()
+        factor = percent / 100.0
+        print factor
+        width = self.image.width() * factor
+        height = self.image.height() * factor
+        image = self.image.scaled(width, height, Qt.KeepAspectRatio)
+        self.imageLabel.setPixmap(QPixmap.fromImage(self.image))
+
+    def loadInitialFile(self):
+        settings = QSettings()
+        fname = unicode(settings.value("LastFile").toString())
+        if fname and QFile.exists(fname):
+            self.loadFile(fname)
+
+    def loadFile(self, fname=None):
+        if fname is None:
+            action = self.sender()
+            if isinstance(action, QAction):
+                fname = unicode(action.data().toString())
+                # if not self.okToContinue():
+                #   return
+            else:
+                return
+        if fname:
+            self.filename = None
+            image = QImage(fname)
+            if image.isNull():
+                message = "Failed to read %s" % fname
+            else:
+                # self.addRecentFile(fname)
+                self.image = QImage()
+                # for action, check in self.resetableActions:
+                #   action.setChecked(check)
+                self.image = image
+                self.filename = fname
+                self.showImage()
+                self.dirty = False
+                message = "Loaded %s" % os.path.basename(fname)
+
+    def fileOpen(self):
+        # if not self.okToContinue():
+        #   return
+        dir = os.path.dirname(self.filename) \
+            if self.filename is not None else "."
+        formats = ["*.%s" % unicode(format).lower() \
+                for format in QImageReader.supportedImageFormats()]
+        fname = unicode(QFileDialog.getOpenFileName(self,
+                            "Image Changer - Choose Image", dir,
+                            "Image files (%s)" % " ".join(formats)))
+        if fname:
+            self.loadFile(fname)
+
+
+class MainGUI(QMainWindow):
 
     def __init__(self):
         super(MainGUI, self).__init__()
@@ -78,6 +182,18 @@ class MainGUI(QtGui.QMainWindow):
         self.homography = Organizer()
         self.feature_tracking = Organizer()
 
+        self.aerialImage = ImageLabel()
+        self.screenshot = ImageLabel()
+
+        self.aerialImage.zoomSpinBox = self.ui.homography_hslider_zoom_aerial_image
+
+        self.imageSplitter = QSplitter(Qt.Horizontal)
+        self.imageSplitter.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.imageSplitter.addWidget(self.screenshot)
+        self.imageSplitter.addWidget(self.aerialImage)
+
+        self.ui.homography_layout.addWidget(self.imageSplitter)
+
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
         # self.ui.actionLoad_Image.triggered.connect(self.open_image)
@@ -86,8 +202,8 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.main_tab_widget.setCurrentIndex(0)  # Start on the first tab
 
         # Connect button actionst
-        self.ui.homography_button_open_aerial_image.clicked.connect(self.homography_open_image_aerial)  # TODO: New method. Check which tab is open. Move to homography tab if not already there. Then call open_image_aerial.
-        self.ui.homography_button_open_camera_image.clicked.connect(self.homography_open_image_camera)
+        self.ui.homography_button_open_aerial_image.clicked.connect(self.aerialImage.fileOpen)  # TODO: New method. Check which tab is open. Move to homography tab if not already there. Then call open_image_aerial.
+        self.ui.homography_button_open_camera_image.clicked.connect(self.screenshot.fileOpen)
 
         # Connect back + continue buttons
         self.ui.homography_continue_button.clicked.connect(self.show_next_tab)
@@ -96,6 +212,8 @@ class MainGUI(QtGui.QMainWindow):
 
         # self.ui.track_image.mousePressEvent = self.get_image_position
         self.show()
+
+        
 
     def show_next_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
@@ -106,7 +224,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.main_tab_widget.setCurrentIndex(curr_i - 1)
 
     def open_project(self):
-        fname = QtGui.QFileDialog.getOpenFileName(
+        fname = QFileDialog.getOpenFileName(
             self, 'Open Project', '/home')
         print(fname)
 
@@ -118,7 +236,7 @@ class MainGUI(QtGui.QMainWindow):
         """
         qi = self.open_image_fd(dialog_text="Select camera image...")
         self.homography.image_aerial = qi
-        self.homography.pixmap_aerial = QtGui.QPixmap.fromImage(qi)
+        self.homography.pixmap_aerial = QPixmap.fromImage(qi)
         # Do other stuff
         # self.homography_show_image('aerial'), etc. ?
 
@@ -130,7 +248,7 @@ class MainGUI(QtGui.QMainWindow):
         """
         qi = self.open_image_fd(dialog_text="Select aerial image...")
         self.homography.image_aerial = qi
-        self.homography.pixmap_aerial = QtGui.QPixmap.fromImage(qi)
+        self.homography.pixmap_aerial = QPixmap.fromImage(qi)
         # Do other stuff
         # self.homography_show_image('aerial'), etc. ?
 
@@ -149,15 +267,15 @@ class MainGUI(QtGui.QMainWindow):
         Returns:
             QImage: Image object created from selected image file.
         """
-        fname = QtGui.QFileDialog.getOpenFileName(self, dialog_text, default_dir)  # TODO: Filter to show only image files
-        image = QtGui.QImage(fname)
+        fname = QFileDialog.getOpenFileName(self, dialog_text, default_dir)  # TODO: Filter to show only image files
+        image = QImage(fname)
         return image
 
     # def open_image(self):
-    #     fname = QtGui.QFileDialog.getOpenFileName(self, 'Open Project', '')
+    #     fname = QFileDialog.getOpenFileName(self, 'Open Project', '')
     #     print(fname)
-    #     tracking_image = QtGui.QImage(fname)
-    #     pixmap = QtGui.QPixmap.fromImage(tracking_image)
+    #     tracking_image = QImage(fname)
+    #     pixmap = QPixmap.fromImage(tracking_image)
     #     pixmap = pixmap.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
     #     self._tracking_image = DisplayImage(tracking_image, pixmap)
     #     self.ui.track_image.setPixmap(pixmap)
@@ -168,7 +286,7 @@ class MainGUI(QtGui.QMainWindow):
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     ex = MainGUI()
     # print(dir(ex.ui))  # Uncomment to show structure of ui object
     sys.exit(app.exec_())

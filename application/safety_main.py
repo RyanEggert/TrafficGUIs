@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Wed Mar 30 07:41:32 2016
+# Created: Sun Apr  3 10:19:56 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -44,6 +44,7 @@ class Ui_TransportationSafety(object):
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.control_box = QtGui.QFrame(self.tab_homography)
         self.control_box.setMinimumSize(QtCore.QSize(0, 40))
+        self.control_box.setMaximumSize(QtCore.QSize(16777215, 150))
         self.control_box.setFrameShape(QtGui.QFrame.StyledPanel)
         self.control_box.setFrameShadow(QtGui.QFrame.Raised)
         self.control_box.setObjectName(_fromUtf8("control_box"))
@@ -74,10 +75,6 @@ class Ui_TransportationSafety(object):
         self.homography_label_zoom_computed_image = QtGui.QLabel(self.control_box)
         self.homography_label_zoom_computed_image.setObjectName(_fromUtf8("homography_label_zoom_computed_image"))
         self.zoom_sliders.addWidget(self.homography_label_zoom_computed_image)
-        self.homography_hslider_zoom_computed_image = QtGui.QSlider(self.control_box)
-        self.homography_hslider_zoom_computed_image.setOrientation(QtCore.Qt.Horizontal)
-        self.homography_hslider_zoom_computed_image.setObjectName(_fromUtf8("homography_hslider_zoom_computed_image"))
-        self.zoom_sliders.addWidget(self.homography_hslider_zoom_computed_image)
         spacerItem2 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.zoom_sliders.addItem(spacerItem2)
         self.homography_label_zoom_aerial_image = QtGui.QLabel(self.control_box)
@@ -91,18 +88,6 @@ class Ui_TransportationSafety(object):
         self.verticalLayout.addWidget(self.control_box)
         self.homography_layout = QtGui.QHBoxLayout()
         self.homography_layout.setObjectName(_fromUtf8("homography_layout"))
-        self.homography_cameraview = QtGui.QGraphicsView(self.tab_homography)
-        self.homography_cameraview.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.CrossCursor))
-        self.homography_cameraview.setObjectName(_fromUtf8("homography_cameraview"))
-        self.homography_layout.addWidget(self.homography_cameraview)
-        self.homography_results = QtGui.QGraphicsView(self.tab_homography)
-        self.homography_results.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.CrossCursor))
-        self.homography_results.setObjectName(_fromUtf8("homography_results"))
-        self.homography_layout.addWidget(self.homography_results)
-        self.homography_aerialview = QtGui.QGraphicsView(self.tab_homography)
-        self.homography_aerialview.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.CrossCursor))
-        self.homography_aerialview.setObjectName(_fromUtf8("homography_aerialview"))
-        self.homography_layout.addWidget(self.homography_aerialview)
         self.verticalLayout.addLayout(self.homography_layout)
         self.homography_flow_control = QtGui.QWidget(self.tab_homography)
         self.homography_flow_control.setMinimumSize(QtCore.QSize(0, 50))
