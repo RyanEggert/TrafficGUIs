@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Sun Apr  3 10:19:56 2016
+# Created: Sun Apr  3 14:16:25 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -29,8 +29,8 @@ class Ui_TransportationSafety(object):
         TransportationSafety.resize(1024, 705)
         self.centralWidget = QtGui.QWidget(TransportationSafety)
         self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
-        self.verticalLayout_2 = QtGui.QVBoxLayout(self.centralWidget)
-        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.horizontalLayout = QtGui.QHBoxLayout(self.centralWidget)
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.main_tab_widget = QtGui.QTabWidget(self.centralWidget)
         self.main_tab_widget.setAcceptDrops(False)
         self.main_tab_widget.setAutoFillBackground(False)
@@ -88,6 +88,26 @@ class Ui_TransportationSafety(object):
         self.verticalLayout.addWidget(self.control_box)
         self.homography_layout = QtGui.QHBoxLayout()
         self.homography_layout.setObjectName(_fromUtf8("homography_layout"))
+        self.scrollArea_2 = QtGui.QScrollArea(self.tab_homography)
+        self.scrollArea_2.setWidgetResizable(True)
+        self.scrollArea_2.setObjectName(_fromUtf8("scrollArea_2"))
+        self.homography_camera_scroll_area = QtGui.QWidget()
+        self.homography_camera_scroll_area.setGeometry(QtCore.QRect(0, 0, 486, 424))
+        self.homography_camera_scroll_area.setObjectName(_fromUtf8("homography_camera_scroll_area"))
+        self.horizontalLayout_4 = QtGui.QHBoxLayout(self.homography_camera_scroll_area)
+        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.scrollArea_2.setWidget(self.homography_camera_scroll_area)
+        self.homography_layout.addWidget(self.scrollArea_2)
+        self.scrollArea = QtGui.QScrollArea(self.tab_homography)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
+        self.homography_aerial_scroll_area = QtGui.QWidget()
+        self.homography_aerial_scroll_area.setGeometry(QtCore.QRect(0, 0, 486, 424))
+        self.homography_aerial_scroll_area.setObjectName(_fromUtf8("homography_aerial_scroll_area"))
+        self.gridLayout_2 = QtGui.QGridLayout(self.homography_aerial_scroll_area)
+        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
+        self.scrollArea.setWidget(self.homography_aerial_scroll_area)
+        self.homography_layout.addWidget(self.scrollArea)
         self.verticalLayout.addLayout(self.homography_layout)
         self.homography_flow_control = QtGui.QWidget(self.tab_homography)
         self.homography_flow_control.setMinimumSize(QtCore.QSize(0, 50))
@@ -216,7 +236,7 @@ class Ui_TransportationSafety(object):
         self.tab_other_tools = QtGui.QWidget()
         self.tab_other_tools.setObjectName(_fromUtf8("tab_other_tools"))
         self.main_tab_widget.addTab(self.tab_other_tools, _fromUtf8(""))
-        self.verticalLayout_2.addWidget(self.main_tab_widget)
+        self.horizontalLayout.addWidget(self.main_tab_widget)
         TransportationSafety.setCentralWidget(self.centralWidget)
         self.menuBar = QtGui.QMenuBar(TransportationSafety)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 1024, 25))

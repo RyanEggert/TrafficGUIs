@@ -77,8 +77,9 @@ class ImageLabel(QWidget):
         self.filename = None
         self.image = QImage()
         self.imageLabel = QLabel()
-        self.imageLabel.setMinimumSize(500, 300)
-        self.imageLabel.setContextMenuPolicy(Qt.ActionsContextMenu)
+        self.imageLabel.setMinimumSize(200, 200)
+        self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.imageLabel.setScaledContents(True)
         self.currentPoint = QPoint(300,300)
         self.allPoints = []
 
@@ -87,16 +88,11 @@ class ImageLabel(QWidget):
         return self._zoomSpinBox
     @zoomSpinBox.setter
     def zoomSpinBox(self, new_zsb):
-        print("ConfigSlider")
         self._zoomSpinBox = new_zsb
         self._zoomSpinBox.setMinimum(10)
         self._zoomSpinBox.setMaximum(400)
-        self._zoomSpinBox.setValue(100)
+        self._zoomSpinBox.setValue(50)
         self._zoomSpinBox.valueChanged.connect(self.showImage)
-
-
-    
-
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -104,27 +100,40 @@ class ImageLabel(QWidget):
             self.allPoints.append(self.currentPoint)
             self.update()
 
-    def paintEvent(self, event):
-        # self.imageLabel.setPixmap(QPixmap.fromImage(self.image1))
+    def paintEvent(self, event, percent=None):
         painter = QPainter(self)
         pen = QPen(Qt.blue, 7, Qt.SolidLine, Qt.RoundCap)
         painter.drawImage(event.rect(), self.image)
+        print "Event", event.rect().width(), event.rect().height()
+        print "Image", self.image.width(), self.image.height()
+        print "Label", self.imageLabel.width(), self.imageLabel.height()
+
+        # if self.image.isNull():
+        #     return
+        # if percent is None:
+        #     percent = self.zoomSpinBox.value()
+
+        # width = self.image.width() * factor
+        # height = self.image.height() * factor
+        # image = self.image.scaled(width, height, Qt.KeepAspectRatio)
+
+        # painter.drawImage(event.rect(), self.image)
+        # self.showImage()
         painter.setPen(pen)
         for point in self.allPoints:
             painter.drawPoint(point)
-        # self.showImage()
 
     def showImage(self, percent=None):
-        if self.image.isNull():
-            return
-        if percent is None:
-            percent = self.zoomSpinBox.value()
-        factor = percent / 100.0
-        print factor
-        width = self.image.width() * factor
-        height = self.image.height() * factor
-        image = self.image.scaled(width, height, Qt.KeepAspectRatio)
-        self.imageLabel.setPixmap(QPixmap.fromImage(self.image))
+        pass
+        # if self.image.isNull():
+        #     return
+        # if percent is None:
+        #     percent = self.zoomSpinBox.value()
+        # factor = percent / 100.0
+        # width = self.image.width() * factor
+        # height = self.image.height() * factor
+        # self.image.scaled(width, height, Qt.KeepAspectRatio)
+        # self.imageLabel.setPixmap(QPixmap.fromImage(self.image))
 
     def loadInitialFile(self):
         settings = QSettings()
@@ -186,13 +195,13 @@ class MainGUI(QMainWindow):
         self.screenshot = ImageLabel()
 
         self.aerialImage.zoomSpinBox = self.ui.homography_hslider_zoom_aerial_image
+        self.screenshot.zoomSpinBox = self.ui.homography_hslider_zoom_camera_image
 
-        self.imageSplitter = QSplitter(Qt.Horizontal)
-        self.imageSplitter.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.imageSplitter.addWidget(self.screenshot)
-        self.imageSplitter.addWidget(self.aerialImage)
+        # self.ui.homography_camera_scroll_area.layout().addWidget(self.screenshot)
+        # self.ui.homography_aerial_scroll_area.layout().addWidget(self.aerialImage)
 
-        self.ui.homography_layout.addWidget(self.imageSplitter)
+        self.ui.scrollArea.setWidget(self.aerialImage)
+        self.ui.scrollArea_2.setWidget(self.screenshot)
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
